@@ -62,4 +62,3 @@ next-env.d.ts
 # Editor / IDE
 .vscode-test
 .idea/
-.env*
