@@ -1,37 +1,37 @@
 import Generator from "./components/Generator";
 import Pricing from "./components/Pricing";
+import { SAMPLE_EXCERPT } from "@/lib/sample";
 
 const FEATURES = [
   {
-    title: "AI-powered generation",
+    title: "Free structured drafts",
     description:
-      "Create high-quality proposals and documents in seconds — not hours of blank-page writing.",
-    icon: "✦",
+      "Get a full proposal skeleton with executive summary, scope, timeline, and next steps — no card required.",
+    icon: "1",
   },
   {
-    title: "Professional templates",
+    title: "Pro live AI",
     description:
-      "Business, sales, project, RFP, and report formats structured the way clients expect.",
-    icon: "☰",
+      "Upgrade once and generate AI-written proposals tailored to your brief, tone, and length.",
+    icon: "2",
   },
   {
-    title: "Customizable output",
+    title: "Export that ships",
     description:
-      "Tune tone, length, and details so every draft matches your brand and audience.",
-    icon: "◎",
+      "Copy, download .txt, or export a real .docx you can open in Word or Google Docs.",
+    icon: "3",
   },
   {
-    title: "Copy & download",
+    title: "Refine in one click",
     description:
-      "Export your draft instantly, refine in your editor, and ship with confidence.",
-    icon: "↓",
+      "Regenerate, make it shorter, or switch to a more formal tone without starting over.",
+    icon: "4",
   },
 ];
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <a href="#" className="flex items-center gap-2 font-semibold tracking-tight">
@@ -41,36 +41,35 @@ export default function Home() {
             Propogen AI
           </a>
           <nav className="hidden items-center gap-8 text-sm text-muted sm:flex">
+            <a href="#example" className="transition hover:text-foreground">
+              Example
+            </a>
             <a href="#features" className="transition hover:text-foreground">
               Features
-            </a>
-            <a href="#pricing" className="transition hover:text-foreground">
-              Pricing
             </a>
             <a href="#generator" className="transition hover:text-foreground">
               Generator
             </a>
-            <a href="#how" className="transition hover:text-foreground">
-              How it works
+            <a href="#pricing" className="transition hover:text-foreground">
+              Pricing
             </a>
           </nav>
           <a
-            href="#pricing"
+            href="#generator"
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover"
           >
-            Upgrade
+            Try free
           </a>
         </div>
       </header>
 
       <main className="flex-1">
-        {/* Hero */}
         <section className="relative overflow-hidden border-b border-border">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(79,70,229,0.12),_transparent_55%)]" />
           <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-28">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted shadow-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              AI-powered document writing
+              Free to try · Pro when you need AI
             </p>
             <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Proposals that write{" "}
@@ -79,27 +78,102 @@ export default function Home() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
-              Propogen AI turns your brief into professional business proposals,
-              reports, and documents — so you can focus on winning the work.
+              Start with a free structured draft. Upgrade to Pro for live AI
+              tailored to your client, scope, and tone — then export to Word.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <a
                 href="#generator"
                 className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-hover"
               >
-                Generate a proposal
+                Try free generator
               </a>
               <a
-                href="#features"
+                href="#example"
                 className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold transition hover:bg-background"
               >
-                See features
+                See sample output
               </a>
+            </div>
+            <p className="mx-auto mt-4 max-w-md text-xs text-muted">
+              Free = solid template draft · Pro = live AI rewrite · No card
+              required to try
+            </p>
+          </div>
+        </section>
+
+        {/* Sample output */}
+        <section
+          id="example"
+          className="scroll-mt-24 border-b border-border bg-card/40 py-16 sm:py-20"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Example
+              </p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+                What a free draft looks like
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-muted">
+                Sample brief: retail omnichannel program. Free builds this kind
+                of structure instantly; Pro rewrites it with live AI.
+              </p>
+            </div>
+
+            <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-5">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                  Sample brief
+                </p>
+                <dl className="mt-4 space-y-3 text-sm">
+                  <div>
+                    <dt className="text-muted">Company</dt>
+                    <dd className="font-medium">Northbridge Consulting</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Client</dt>
+                    <dd className="font-medium">Harborview Retail Group</dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Topic</dt>
+                    <dd className="font-medium">
+                      Omnichannel customer experience program
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted">Goals</dt>
+                    <dd className="text-foreground/90">
+                      +15% online conversion, shared inventory, 6-month program
+                      (~$80–120k)
+                    </dd>
+                  </div>
+                </dl>
+                <a
+                  href="#generator"
+                  className="mt-6 flex w-full items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+                >
+                  Open generator & try this
+                </a>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-background p-6 shadow-sm lg:col-span-3">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    Free draft excerpt
+                  </p>
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    Structured sections
+                  </span>
+                </div>
+                <pre className="max-h-[340px] overflow-auto whitespace-pre-wrap font-sans text-xs leading-relaxed text-foreground/90 sm:text-sm">
+                  {SAMPLE_EXCERPT}
+                </pre>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Features */}
         <section id="features" className="scroll-mt-24 border-b border-border py-16 sm:py-24">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 text-center">
@@ -107,7 +181,7 @@ export default function Home() {
                 Features
               </p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-                Everything you need to ship faster
+                Built for getting to a shippable draft
               </h2>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -116,7 +190,7 @@ export default function Home() {
                   key={f.title}
                   className="rounded-2xl border border-border bg-card p-6 shadow-sm transition hover:shadow-md"
                 >
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-lg text-primary">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-sm font-bold text-primary">
                     {f.icon}
                   </div>
                   <h3 className="font-semibold">{f.title}</h3>
@@ -129,7 +203,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How it works */}
         <section id="how" className="scroll-mt-24 border-b border-border bg-card/50 py-16 sm:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 text-center">
@@ -144,18 +217,18 @@ export default function Home() {
               {[
                 {
                   step: "1",
-                  title: "Pick a template",
-                  body: "Choose business, sales, project, RFP, or executive report.",
+                  title: "Try the sample or add your brief",
+                  body: "One click loads a realistic retail proposal brief — or type your own.",
                 },
                 {
                   step: "2",
-                  title: "Add your details",
-                  body: "Company, client, topic, and the key facts that matter.",
+                  title: "Generate free (or Pro AI)",
+                  body: "Free builds a structured template draft. Pro uses live AI on your details.",
                 },
                 {
                   step: "3",
-                  title: "Generate & refine",
-                  body: "Get a polished draft, copy or download, then ship it.",
+                  title: "Refine & export",
+                  body: "Regenerate, shorten, formalize, then copy or download as .docx.",
                 },
               ].map((item) => (
                 <li key={item.step} className="text-center">
@@ -170,14 +243,16 @@ export default function Home() {
           </div>
         </section>
 
-        <Pricing />
         <Generator />
+        <Pricing />
       </main>
 
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-muted sm:flex-row sm:px-6">
           <p>© {new Date().getFullYear()} Propogen AI</p>
-          <p>AI-powered proposal & document generator</p>
+          <p className="text-center sm:text-right">
+            Free drafts · Pro AI · Payments by Stripe
+          </p>
         </div>
       </footer>
     </div>

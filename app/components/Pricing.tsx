@@ -54,11 +54,11 @@ export default function Pricing() {
             Pricing
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-            Start free. Upgrade when you need AI.
+            Start free. Upgrade only if you want AI.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted">
-            Free includes professional demo templates. Pro unlocks live AI
-            generation powered by SpaceXAI.
+            Free always works — structured proposal drafts with no card. Pro is
+            a one-time unlock for live AI rewrites on this browser.
           </p>
         </div>
 
@@ -77,23 +77,24 @@ export default function Pricing() {
               <span className="text-base font-normal text-muted"> forever</span>
             </p>
             <ul className="mt-6 space-y-3 text-sm text-muted">
-              <li>✓ Proposal & document templates</li>
-              <li>✓ Copy & download drafts</li>
-              <li>✓ Demo-quality generation</li>
+              <li>✓ Structured proposal drafts (no card)</li>
+              <li>✓ Sample brief + one-click try</li>
+              <li>✓ Copy, .txt, and .docx export</li>
+              <li>✓ Regenerate / shorter / more formal</li>
               <li className="text-muted/70">– Live AI writing</li>
             </ul>
             <a
               href="#generator"
               className="mt-8 flex w-full items-center justify-center rounded-xl border border-border px-4 py-3 text-sm font-semibold transition hover:bg-background"
             >
-              Use free generator
+              Keep using free
             </a>
           </div>
 
           {/* Pro */}
           <div className="relative rounded-2xl border-2 border-primary bg-card p-8 shadow-md">
             <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-white">
-              Recommended
+              Optional upgrade
             </span>
             <p className="text-sm font-semibold text-primary">Pro</p>
             <p className="mt-2 text-4xl font-bold tracking-tight">
@@ -102,8 +103,8 @@ export default function Pricing() {
             </p>
             <ul className="mt-6 space-y-3 text-sm text-muted">
               <li>✓ Everything in Free</li>
-              <li>✓ Live AI proposal generation</li>
-              <li>✓ Higher-quality, custom drafts</li>
+              <li>✓ Live AI generation (SpaceXAI)</li>
+              <li>✓ Brief-aware custom drafts</li>
               <li>✓ Unlock on this browser after payment</li>
             </ul>
 

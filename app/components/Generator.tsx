@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { SAMPLE_BRIEF } from "@/lib/sample";
+import { downloadAsDocx } from "@/lib/exportDocx";
+import DocumentPreview from "./DocumentPreview";
 
 const TEMPLATES = [
   { id: "business", label: "Business Proposal" },
@@ -23,10 +26,20 @@ const LENGTHS = [
   { id: "long", label: "Detailed" },
 ] as const;
 
+type GeneratePayload = {
+  template: string;
+  tone: string;
+  length: string;
+  company: string;
+  client: string;
+  topic: string;
+  details: string;
+};
+
 export default function Generator() {
-  const [template, setTemplate] = useState<string>("business");
-  const [tone, setTone] = useState<string>("professional");
-  const [length, setLength] = useState<string>("medium");
+  const [template, setTemplate] = useState<string>(SAMPLE_BRIEF.template);
+  const [tone, setTone] = useState<string>(SAMPLE_BRIEF.tone);
+  const [length, setLength] = useState<string>(SAMPLE_BRIEF.length);
   const [company, setCompany] = useState("");
   const [client, setClient] = useState("");
   const [topic, setTopic] = useState("");
@@ -36,6 +49,8 @@ export default function Generator() {
   const [error, setError] = useState("");
   const [source, setSource] = useState<string | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [docxLoading, setDocxLoading] = useState(false);
 
   useEffect(() => {
     void fetch("/api/stripe/verify")
@@ -44,8 +59,7 @@ export default function Generator() {
       .catch(() => {});
   }, []);
 
-  async function handleGenerate(e: React.FormEvent) {
-    e.preventDefault();
+  const runGenerate = useCallback(async (payload: GeneratePayload) => {
     setError("");
     setOutput("");
     setSource(null);
@@ -55,15 +69,7 @@ export default function Generator() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          template,
-          tone,
-          length,
-          company,
-          client,
-          topic,
-          details,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = (await res.json()) as {
@@ -83,14 +89,68 @@ export default function Generator() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  function currentPayload(): GeneratePayload {
+    return { template, tone, length, company, client, topic, details };
+  }
+
+  async function handleGenerate(e: React.FormEvent) {
+    e.preventDefault();
+    await runGenerate(currentPayload());
+  }
+
+  function loadSampleBrief() {
+    setTemplate(SAMPLE_BRIEF.template);
+    setTone(SAMPLE_BRIEF.tone);
+    setLength(SAMPLE_BRIEF.length);
+    setCompany(SAMPLE_BRIEF.company);
+    setClient(SAMPLE_BRIEF.client);
+    setTopic(SAMPLE_BRIEF.topic);
+    setDetails(SAMPLE_BRIEF.details);
+    setError("");
+  }
+
+  async function trySample() {
+    loadSampleBrief();
+    await runGenerate({ ...SAMPLE_BRIEF });
+  }
+
+  async function regenerate() {
+    if (!company || !client || !topic || !details) {
+      setError("Fill in the form (or click Try sample) first.");
+      return;
+    }
+    await runGenerate(currentPayload());
+  }
+
+  async function makeShorter() {
+    if (!company || !client || !topic || !details) {
+      setError("Generate a document first, or try the sample.");
+      return;
+    }
+    setLength("short");
+    await runGenerate({ ...currentPayload(), length: "short" });
+  }
+
+  async function makeMoreFormal() {
+    if (!company || !client || !topic || !details) {
+      setError("Generate a document first, or try the sample.");
+      return;
+    }
+    setTone("formal");
+    await runGenerate({ ...currentPayload(), tone: "formal" });
   }
 
   function handleCopy() {
     if (!output) return;
-    void navigator.clipboard.writeText(output);
+    void navigator.clipboard.writeText(output).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }
 
-  function handleDownload() {
+  function handleDownloadTxt() {
     if (!output) return;
     const blob = new Blob([output], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -99,6 +159,21 @@ export default function Generator() {
     a.download = `propogen-${template}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleDownloadDocx() {
+    if (!output) return;
+    setDocxLoading(true);
+    try {
+      await downloadAsDocx(output, {
+        filenameBase: topic || company || "propogen",
+        title: topic || "Proposal",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "DOCX export failed");
+    } finally {
+      setDocxLoading(false);
+    }
   }
 
   return (
@@ -112,31 +187,57 @@ export default function Generator() {
             Create your document
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted">
-            Choose a template, describe what you need, and generate a polished
-            draft in seconds.
+            Free gives you a solid structured draft. Pro rewrites it with live
+            AI tailored to your brief.
           </p>
-          <p className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
-            <span
-              className={`h-1.5 w-1.5 rounded-full ${isPro ? "bg-success" : "bg-muted"}`}
-            />
-            {isPro ? (
-              <span className="text-success">Pro · live AI unlocked</span>
-            ) : (
-              <span className="text-muted">
-                Free plan ·{" "}
-                <a href="#pricing" className="font-semibold text-primary underline-offset-2 hover:underline">
-                  upgrade for AI
-                </a>
-              </span>
-            )}
-          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${isPro ? "bg-success" : "bg-muted"}`}
+              />
+              {isPro ? (
+                <span className="text-success">Pro · live AI unlocked</span>
+              ) : (
+                <span className="text-muted">
+                  Free plan · structured demo draft ·{" "}
+                  <a
+                    href="#pricing"
+                    className="font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    upgrade for AI
+                  </a>
+                </span>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={() => void trySample()}
+              disabled={loading}
+              className="rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15 disabled:opacity-60"
+            >
+              {loading ? "Generating sample…" : "Try sample (one click)"}
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
           <form
-            onSubmit={handleGenerate}
+            onSubmit={(e) => void handleGenerate(e)}
             className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
           >
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted">
+                Your brief
+              </p>
+              <button
+                type="button"
+                onClick={loadSampleBrief}
+                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+              >
+                Load sample brief
+              </button>
+            </div>
+
             <div className="space-y-5">
               <div>
                 <label className="mb-1.5 block text-sm font-medium">
@@ -164,7 +265,7 @@ export default function Generator() {
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    placeholder="Acme Consulting"
+                    placeholder={SAMPLE_BRIEF.company}
                     className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-primary focus:ring-2"
                     required
                   />
@@ -177,7 +278,7 @@ export default function Generator() {
                     type="text"
                     value={client}
                     onChange={(e) => setClient(e.target.value)}
-                    placeholder="Northwind Corp"
+                    placeholder={SAMPLE_BRIEF.client}
                     className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-primary focus:ring-2"
                     required
                   />
@@ -192,7 +293,7 @@ export default function Generator() {
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="Digital transformation engagement"
+                  placeholder={SAMPLE_BRIEF.topic}
                   className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-primary focus:ring-2"
                   required
                 />
@@ -205,7 +306,7 @@ export default function Generator() {
                 <textarea
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
-                  placeholder="Goals, scope, timeline, budget range, differentiators…"
+                  placeholder={SAMPLE_BRIEF.details}
                   rows={5}
                   className="w-full resize-y rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none ring-primary focus:ring-2"
                   required
@@ -263,8 +364,10 @@ export default function Generator() {
                     <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Generating…
                   </>
+                ) : isPro ? (
+                  "Generate with AI"
                 ) : (
-                  "Generate document"
+                  "Generate free draft"
                 )}
               </button>
             </div>
@@ -276,20 +379,28 @@ export default function Generator() {
                 Preview
               </h3>
               {output && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={handleCopy}
                     className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-background"
                   >
-                    Copy
+                    {copied ? "Copied" : "Copy"}
                   </button>
                   <button
                     type="button"
-                    onClick={handleDownload}
+                    onClick={handleDownloadTxt}
                     className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-background"
                   >
-                    Download
+                    .txt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleDownloadDocx()}
+                    disabled={docxLoading}
+                    className="rounded-lg border border-border bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15 disabled:opacity-60"
+                  >
+                    {docxLoading ? "…" : ".docx"}
                   </button>
                 </div>
               )}
@@ -302,29 +413,65 @@ export default function Generator() {
               </p>
             )}
 
+            {output && !loading && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void regenerate()}
+                  disabled={loading}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-background disabled:opacity-60"
+                >
+                  Regenerate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void makeShorter()}
+                  disabled={loading}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-background disabled:opacity-60"
+                >
+                  Make shorter
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void makeMoreFormal()}
+                  disabled={loading}
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:bg-background disabled:opacity-60"
+                >
+                  More formal
+                </button>
+              </div>
+            )}
+
             <div className="flex-1 overflow-auto rounded-xl border border-border bg-background p-4">
               {loading && (
                 <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-muted">
                   <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-                  <p className="text-sm">Drafting your document…</p>
+                  <p className="text-sm">
+                    {isPro
+                      ? "AI is drafting your document…"
+                      : "Building your free structured draft…"}
+                  </p>
                 </div>
               )}
               {!loading && !output && (
-                <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-2 text-center text-muted">
+                <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 text-center text-muted">
                   <p className="text-sm font-medium text-foreground">
                     Your document will appear here
                   </p>
                   <p className="max-w-xs text-xs">
-                    Fill in the form and hit Generate to create a professional
-                    draft.
+                    Not sure where to start? Load the retail sample and generate
+                    in one click.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => void trySample()}
+                    className="mt-1 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                  >
+                    Try sample now
+                  </button>
                 </div>
               )}
-              {!loading && output && (
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                  {output}
-                </pre>
-              )}
+              {!loading && output && <DocumentPreview text={output} />}
             </div>
           </div>
         </div>
