@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const TEMPLATES = [
   { id: "business", label: "Business Proposal" },
@@ -35,6 +35,14 @@ export default function Generator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [source, setSource] = useState<string | null>(null);
+  const [isPro, setIsPro] = useState(false);
+
+  useEffect(() => {
+    void fetch("/api/stripe/verify")
+      .then((r) => r.json())
+      .then((data: { isPro?: boolean }) => setIsPro(Boolean(data.isPro)))
+      .catch(() => {});
+  }, []);
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
@@ -58,12 +66,18 @@ export default function Generator() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as {
+        document?: string;
+        source?: string;
+        error?: string;
+        isPro?: boolean;
+      };
       if (!res.ok) {
         throw new Error(data.error || "Generation failed");
       }
-      setOutput(data.document);
+      setOutput(data.document ?? "");
       setSource(data.source ?? null);
+      if (typeof data.isPro === "boolean") setIsPro(data.isPro);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -100,6 +114,21 @@ export default function Generator() {
           <p className="mx-auto mt-3 max-w-xl text-muted">
             Choose a template, describe what you need, and generate a polished
             draft in seconds.
+          </p>
+          <p className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium">
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${isPro ? "bg-success" : "bg-muted"}`}
+            />
+            {isPro ? (
+              <span className="text-success">Pro · live AI unlocked</span>
+            ) : (
+              <span className="text-muted">
+                Free plan ·{" "}
+                <a href="#pricing" className="font-semibold text-primary underline-offset-2 hover:underline">
+                  upgrade for AI
+                </a>
+              </span>
+            )}
           </p>
         </div>
 

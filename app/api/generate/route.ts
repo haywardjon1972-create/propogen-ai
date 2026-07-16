@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isProUser } from "@/lib/stripe";
 
 type GenerateBody = {
   template?: string;
@@ -213,16 +214,29 @@ export async function POST(req: NextRequest) {
     details,
   };
 
-  const aiDoc = await generateWithXai(payload);
-  if (aiDoc) {
+  const pro = await isProUser();
+
+  // Live AI is a Pro feature (requires successful Stripe checkout cookie + XAI key)
+  if (pro) {
+    const aiDoc = await generateWithXai(payload);
+    if (aiDoc) {
+      return NextResponse.json({
+        document: aiDoc,
+        source: "SpaceXAI (grok-4.5) · Pro",
+        isPro: true,
+      });
+    }
     return NextResponse.json({
-      document: aiDoc,
-      source: "SpaceXAI (grok-4.5)",
+      document: buildMockDocument(payload),
+      source:
+        "Pro unlocked, but AI unavailable (check XAI_API_KEY) — demo template used",
+      isPro: true,
     });
   }
 
   return NextResponse.json({
     document: buildMockDocument(payload),
-    source: "Demo template (add XAI_API_KEY for live AI)",
+    source: "Free demo template · Upgrade to Pro for live AI",
+    isPro: false,
   });
 }

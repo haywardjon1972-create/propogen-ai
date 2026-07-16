@@ -1,4 +1,5 @@
 import Generator from "./components/Generator";
+import Pricing from "./components/Pricing";
 
 const FEATURES = [
   {
@@ -43,6 +44,9 @@ export default function Home() {
             <a href="#features" className="transition hover:text-foreground">
               Features
             </a>
+            <a href="#pricing" className="transition hover:text-foreground">
+              Pricing
+            </a>
             <a href="#generator" className="transition hover:text-foreground">
               Generator
             </a>
@@ -51,10 +55,10 @@ export default function Home() {
             </a>
           </nav>
           <a
-            href="#generator"
+            href="#pricing"
             className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover"
           >
-            Get started
+            Upgrade
           </a>
         </div>
       </header>
@@ -166,6 +170,7 @@ export default function Home() {
           </div>
         </section>
 
+        <Pricing />
         <Generator />
       </main>
 
