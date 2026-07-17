@@ -265,7 +265,10 @@ export default function Home() {
         </div>
         <p className="mx-auto mt-3 max-w-6xl px-4 text-center text-xs text-muted sm:px-6">
           Grok helps write Pro proposals and runs our social content engine —
-          including @propogen.ai on Instagram.
+          including @propogen.ai on Instagram.{" "}
+          <a href="/privacy" className="text-primary underline-offset-2 hover:underline">
+            Privacy Policy
+          </a>
         </p>
       </footer>
     </div>
