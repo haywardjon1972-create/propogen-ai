@@ -1,4 +1,21 @@
-const GRAPH = "https://graph.facebook.com/v21.0";
+/**
+ * Instagram publishing via Meta Graph.
+ * Supports:
+ * - Instagram API with Instagram Login → graph.instagram.com (tokens often start with IG…)
+ * - Instagram API with Facebook Login → graph.facebook.com (Page tokens, often EAA…)
+ */
+
+function graphBase(): string {
+  const explicit = process.env.INSTAGRAM_GRAPH_BASE?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN?.trim() || "";
+  // Instagram Login user tokens commonly start with IG
+  if (token.startsWith("IG")) {
+    return "https://graph.instagram.com/v21.0";
+  }
+  return "https://graph.facebook.com/v21.0";
+}
 
 export type IgConfig = {
   accessToken: string;
@@ -25,7 +42,7 @@ async function graphGet<T>(
   token: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  const url = new URL(`${GRAPH}${path}`);
+  const url = new URL(`${graphBase()}${path.startsWith("/") ? path : `/${path}`}`);
   url.searchParams.set("access_token", token);
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
@@ -43,7 +60,7 @@ async function graphPost<T>(
   token: string,
   body: Record<string, string>,
 ): Promise<T> {
-  const url = new URL(`${GRAPH}${path}`);
+  const url = new URL(`${graphBase()}${path.startsWith("/") ? path : `/${path}`}`);
   url.searchParams.set("access_token", token);
   const res = await fetch(url.toString(), {
     method: "POST",
@@ -58,12 +75,37 @@ async function graphPost<T>(
 }
 
 export async function verifyInstagramConnection(config: IgConfig) {
-  const me = await graphGet<{ id: string; username?: string; name?: string }>(
-    `/${config.igUserId}`,
-    config.accessToken,
-    { fields: "id,username,name" },
-  );
-  return me;
+  // Instagram Login: /me works; also try direct id
+  try {
+    const me = await graphGet<{
+      id?: string;
+      user_id?: string;
+      username?: string;
+      name?: string;
+      account_type?: string;
+    }>(`/me`, config.accessToken, {
+      fields: "user_id,username,id,account_type,name",
+    });
+    return {
+      id: me.user_id || me.id || config.igUserId,
+      username: me.username,
+      name: me.name,
+      account_type: me.account_type,
+    };
+  } catch {
+    const direct = await graphGet<{
+      id?: string;
+      username?: string;
+      name?: string;
+    }>(`/${config.igUserId}`, config.accessToken, {
+      fields: "id,username,name",
+    });
+    return {
+      id: direct.id || config.igUserId,
+      username: direct.username,
+      name: direct.name,
+    };
+  }
 }
 
 /**
@@ -84,7 +126,6 @@ export async function publishImagePost(
     throw new Error("caption is required");
   }
 
-  // 1) Create media container
   const container = await graphPost<{ id: string }>(
     `/${config.igUserId}/media`,
     config.accessToken,
@@ -98,10 +139,8 @@ export async function publishImagePost(
     throw new Error("No container id returned from Instagram");
   }
 
-  // 2) Wait briefly for container processing (IG often needs a moment)
   await waitForContainer(config, container.id);
 
-  // 3) Publish
   const published = await graphPost<{ id: string }>(
     `/${config.igUserId}/media_publish`,
     config.accessToken,
@@ -118,25 +157,27 @@ export async function publishImagePost(
 async function waitForContainer(
   config: IgConfig,
   creationId: string,
-  attempts = 8,
+  attempts = 10,
 ): Promise<void> {
   for (let i = 0; i < attempts; i++) {
-    const status = await graphGet<{
-      status_code?: string;
-      status?: string;
-    }>(`/${creationId}`, config.accessToken, {
-      fields: "status_code,status",
-    });
+    try {
+      const status = await graphGet<{
+        status_code?: string;
+        status?: string;
+      }>(`/${creationId}`, config.accessToken, {
+        fields: "status_code,status",
+      });
 
-    const code = (status.status_code || status.status || "").toUpperCase();
-    if (code === "FINISHED" || code === "PUBLISHED") return;
-    if (code === "ERROR" || code === "EXPIRED") {
-      throw new Error(`Instagram media container failed: ${code}`);
+      const code = (status.status_code || status.status || "").toUpperCase();
+      if (code === "FINISHED" || code === "PUBLISHED") return;
+      if (code === "ERROR" || code === "EXPIRED") {
+        throw new Error(`Instagram media container failed: ${code}`);
+      }
+    } catch (err) {
+      if (i === attempts - 1) throw err;
     }
-    // IN_PROGRESS / etc.
     await new Promise((r) => setTimeout(r, 2000));
   }
-  // Try publish anyway — sometimes status field is missing but container is ready
 }
 
 export async function generateCaptionWithAi(topic?: string): Promise<string> {
