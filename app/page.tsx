@@ -12,7 +12,7 @@ const FEATURES = [
   {
     title: "Pro live AI",
     description:
-      "Upgrade once and generate AI-written proposals tailored to your brief, tone, and length.",
+      "Upgrade once and generate AI-written proposals tailored to your brief, tone, and length — powered by Grok.",
     icon: "2",
   },
   {
@@ -22,10 +22,10 @@ const FEATURES = [
     icon: "3",
   },
   {
-    title: "Refine in one click",
+    title: "Run by Grok",
     description:
-      "Regenerate, make it shorter, or switch to a more formal tone without starting over.",
-    icon: "4",
+      "Grok helps write Pro proposals and even runs our social content engine — AI that ships with you.",
+    icon: "✦",
   },
 ];
 
@@ -69,7 +69,7 @@ export default function Home() {
           <div className="relative mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 sm:py-28">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted shadow-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Free to try · Pro when you need AI
+              Powered by Grok · Free to try · Pro when you need AI
             </p>
             <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               Proposals that write{" "}
@@ -79,6 +79,8 @@ export default function Home() {
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
               Start with a free structured draft. Upgrade to Pro for live AI
+              written with{" "}
+              <span className="font-semibold text-foreground">Grok</span> —
               tailored to your client, scope, and tone — then export to Word.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
@@ -95,9 +97,14 @@ export default function Home() {
                 See sample output
               </a>
             </div>
-            <p className="mx-auto mt-4 max-w-md text-xs text-muted">
-              Free = solid template draft · Pro = live AI rewrite · No card
+            <p className="mx-auto mt-4 max-w-lg text-xs text-muted">
+              Free = solid template draft · Pro = Grok-powered rewrite · No card
               required to try
+            </p>
+            <p className="mx-auto mt-3 max-w-xl rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs text-muted sm:text-sm">
+              <span className="font-semibold text-foreground">Built different:</span>{" "}
+              Grok powers Pro proposal writing and helps run our content engine
+              (including Instagram) — so you get AI that actually ships.
             </p>
           </div>
         </section>
@@ -184,7 +191,7 @@ export default function Home() {
                 Built for getting to a shippable draft
               </h2>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map((f) => (
                 <div
                   key={f.title}
@@ -248,12 +255,18 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-border py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-muted sm:flex-row sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 text-sm text-muted sm:flex-row sm:px-6">
           <p>© {new Date().getFullYear()} Propogen AI</p>
           <p className="text-center sm:text-right">
-            Free drafts · Pro AI · Payments by Stripe
+            Free drafts · Pro AI powered by{" "}
+            <span className="font-medium text-foreground">Grok</span> · Payments
+            by Stripe
           </p>
         </div>
+        <p className="mx-auto mt-3 max-w-6xl px-4 text-center text-xs text-muted sm:px-6">
+          Grok helps write Pro proposals and runs our social content engine —
+          including @propogen.ai on Instagram.
+        </p>
       </footer>
     </div>
   );

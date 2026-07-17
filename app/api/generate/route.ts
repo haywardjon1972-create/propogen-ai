@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
     if (aiDoc) {
       return NextResponse.json({
         document: aiDoc,
-        source: "SpaceXAI (grok-4.5) · Pro",
+        source: "Grok · Pro",
         isPro: true,
       });
     }

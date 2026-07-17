@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Propogen AI — AI-Powered Proposal & Document Generator",
   description:
-    "Generate professional business proposals, documents, and reports in seconds with AI.",
+    "Generate professional business proposals in seconds. Free structured drafts, Pro AI writing, powered by Grok. Built for freelancers & consultants.",
 };
 
 export default function RootLayout({

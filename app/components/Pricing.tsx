@@ -103,7 +103,7 @@ export default function Pricing() {
             </p>
             <ul className="mt-6 space-y-3 text-sm text-muted">
               <li>✓ Everything in Free</li>
-              <li>✓ Live AI generation (SpaceXAI)</li>
+              <li>✓ Live AI generation powered by Grok</li>
               <li>✓ Brief-aware custom drafts</li>
               <li>✓ Unlock on this browser after payment</li>
             </ul>
