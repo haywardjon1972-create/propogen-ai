@@ -1,21 +1,9 @@
 /**
  * Instagram publishing via Meta Graph.
- * Supports:
- * - Instagram API with Instagram Login → graph.instagram.com (tokens often start with IG…)
- * - Instagram API with Facebook Login → graph.facebook.com (Page tokens, often EAA…)
+ * Supports Instagram Login (graph.instagram.com) and Facebook Login (graph.facebook.com).
  */
 
-function graphBase(): string {
-  const explicit = process.env.INSTAGRAM_GRAPH_BASE?.trim();
-  if (explicit) return explicit.replace(/\/$/, "");
-
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN?.trim() || "";
-  // Instagram Login user tokens commonly start with IG
-  if (token.startsWith("IG")) {
-    return "https://graph.instagram.com/v21.0";
-  }
-  return "https://graph.facebook.com/v21.0";
-}
+import { graphGet, graphPostForm } from "./instagramGraph";
 
 export type IgConfig = {
   accessToken: string;
@@ -33,49 +21,7 @@ export function isInstagramConfigured(): boolean {
   return getInstagramConfig() !== null;
 }
 
-type GraphError = {
-  error?: { message?: string; type?: string; code?: number };
-};
-
-async function graphGet<T>(
-  path: string,
-  token: string,
-  params: Record<string, string> = {},
-): Promise<T> {
-  const url = new URL(`${graphBase()}${path.startsWith("/") ? path : `/${path}`}`);
-  url.searchParams.set("access_token", token);
-  for (const [k, v] of Object.entries(params)) {
-    url.searchParams.set(k, v);
-  }
-  const res = await fetch(url.toString(), { method: "GET", cache: "no-store" });
-  const data = (await res.json()) as T & GraphError;
-  if (!res.ok || data.error) {
-    throw new Error(data.error?.message || `Graph GET failed: ${res.status}`);
-  }
-  return data;
-}
-
-async function graphPost<T>(
-  path: string,
-  token: string,
-  body: Record<string, string>,
-): Promise<T> {
-  const url = new URL(`${graphBase()}${path.startsWith("/") ? path : `/${path}`}`);
-  url.searchParams.set("access_token", token);
-  const res = await fetch(url.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(body).toString(),
-  });
-  const data = (await res.json()) as T & GraphError;
-  if (!res.ok || data.error) {
-    throw new Error(data.error?.message || `Graph POST failed: ${res.status}`);
-  }
-  return data;
-}
-
 export async function verifyInstagramConnection(config: IgConfig) {
-  // Instagram Login: /me works; also try direct id
   try {
     const me = await graphGet<{
       id?: string;
@@ -126,7 +72,7 @@ export async function publishImagePost(
     throw new Error("caption is required");
   }
 
-  const container = await graphPost<{ id: string }>(
+  const container = await graphPostForm<{ id: string }>(
     `/${config.igUserId}/media`,
     config.accessToken,
     {
@@ -141,7 +87,7 @@ export async function publishImagePost(
 
   await waitForContainer(config, container.id);
 
-  const published = await graphPost<{ id: string }>(
+  const published = await graphPostForm<{ id: string }>(
     `/${config.igUserId}/media_publish`,
     config.accessToken,
     { creation_id: container.id },
