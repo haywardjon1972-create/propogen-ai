@@ -270,6 +270,10 @@ export default function Home() {
             Privacy Policy
           </a>
           {" · "}
+          <a href="/terms" className="text-primary underline-offset-2 hover:underline">
+            Terms
+          </a>
+          {" · "}
           <a
             href="/data-deletion"
             className="text-primary underline-offset-2 hover:underline"
