@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
+import { craftSupportReply, craftWelcomeMessage } from "./propogenSupportReplies";
 
 const GRAPH = "https://graph.facebook.com/v21.0";
-const SITE = "propogen-ai.vercel.app";
 
 export type FbConfig = {
   pageAccessToken: string;
@@ -62,44 +62,33 @@ export function markHandled(key: string) {
   replied.set(key, Date.now());
 }
 
-const FAQ: { match: RegExp; reply: string }[] = [
-  {
-    match: /\b(free|cost|price|pricing|how much|\$|£|pay|payment|pro)\b/i,
-    reply: `Free structured proposal drafts on the web — no card needed to try.\nPro is optional live AI ($19 one-time).\nWebsite: https://${SITE}`,
-  },
-  {
-    match: /\b(link|website|url|site|where|demo|try)\b/i,
-    reply: `Here’s Propogen AI:\nhttps://${SITE}\nFree sample draft available on the generator page.`,
-  },
-  {
-    match: /\b(how (does it )?work|what is (this|propogen)|explain)\b/i,
-    reply: `Propogen turns a short brief into a structured business proposal draft.\nFree templates + export. Pro unlocks live AI writing with Grok.\nTry it: https://${SITE}`,
-  },
-  {
-    match: /\b(hello|hi|hey|thanks|thank you)\b/i,
-    reply: `Hey — thanks for messaging Propogen AI ✦\nFree proposal drafts: https://${SITE}\nAsk about free vs Pro anytime.`,
-  },
-];
-
+/** @deprecated use craftMessengerReplyAsync — kept for simple sync callers */
 export function craftMessengerReply(
   text: string,
   postbackPayload?: string,
 ): string {
   const source = (postbackPayload || text || "").trim();
-  if (!source) {
-    return `Thanks for reaching out ✦ Free proposal drafts: https://${SITE}`;
+  if (!source || /GET_STARTED|get_started|^START$/i.test(source)) {
+    return craftWelcomeMessage();
   }
+  // Sync path: only FAQ-ish default (no await). Prefer async in webhook.
+  return craftWelcomeMessage();
+}
 
-  // Common postback payloads
-  if (/GET_STARTED|get_started|START/i.test(source)) {
-    return `Welcome to Propogen AI ✦\nGenerate free structured proposal drafts at https://${SITE}\nPro unlocks live AI writing (optional). How can we help?`;
+export async function craftMessengerReplyAsync(
+  text: string,
+  postbackPayload?: string,
+): Promise<{ text: string; kind: string }> {
+  const result = await craftSupportReply(text, {
+    channel: "facebook",
+    postbackPayload,
+    allowAi: true,
+    maxLen: 900,
+  });
+  if (result.action === "skip") {
+    return { text: craftWelcomeMessage(), kind: "welcome" };
   }
-
-  for (const row of FAQ) {
-    if (row.match.test(source)) return row.reply;
-  }
-
-  return `Thanks for your message ✦\nFree proposal drafts: https://${SITE}\nAsk about free vs Pro, or how it works.`;
+  return { text: result.text, kind: result.kind };
 }
 
 /**

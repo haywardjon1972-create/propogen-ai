@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   alreadyHandled,
-  craftMessengerReply,
+  craftMessengerReplyAsync,
   getFacebookConfig,
   markHandled,
   sendMessengerText,
@@ -142,11 +142,16 @@ async function handleMessagingEvent(
     }
     markHandled(key);
 
-    const text = craftMessengerReply("", payload);
+    const crafted = await craftMessengerReplyAsync("", payload);
     try {
-      const result = await sendMessengerText(pageAccessToken, senderId, text);
+      const result = await sendMessengerText(
+        pageAccessToken,
+        senderId,
+        crafted.text,
+      );
       console.log("[fb-webhook] postback Send API success", {
         senderPsid: senderId,
+        kind: crafted.kind,
         message_id: result.message_id ?? result,
       });
     } catch (err) {
@@ -183,13 +188,18 @@ async function handleMessagingEvent(
     }
     markHandled(key);
 
-    const reply = craftMessengerReply(text);
+    const crafted = await craftMessengerReplyAsync(text);
     try {
-      const result = await sendMessengerText(pageAccessToken, senderId, reply);
+      const result = await sendMessengerText(
+        pageAccessToken,
+        senderId,
+        crafted.text,
+      );
       console.log("[fb-webhook] message Send API success", {
         senderPsid: senderId,
+        kind: crafted.kind,
         message_id: result.message_id ?? result,
-        replyPreview: reply.slice(0, 80),
+        replyPreview: crafted.text.slice(0, 120),
       });
     } catch (err) {
       console.error("[fb-webhook] message Send API failed", {
