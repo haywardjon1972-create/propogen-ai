@@ -4,8 +4,8 @@ Cadence: every few days. Format: short Reel + hashtags + soft free CTA.
 
 | # | Hook / tip |
 |---|------------|
-| **1** | Lead with their outcome, not your features |
-| 2 | Open with the problem they hired you to solve |
+| **1** | Lead with their outcome, not your features ✅ |
+| **2** | Open with the problem they hired you to solve ✅ |
 | 3 | Keep the first screen scannable (3 bullets max) |
 | 4 | Price only after value is clear |
 | 5 | Name the next step (call / deposit / start date) |
