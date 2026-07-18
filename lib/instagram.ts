@@ -100,10 +100,65 @@ export async function publishImagePost(
   return { containerId: container.id, mediaId: published.id };
 }
 
+/**
+ * Publish a Reel (or VIDEO) from a public HTTPS video URL.
+ * videoUrl must be downloadable by Instagram's servers.
+ */
+export async function publishVideoPost(
+  config: IgConfig,
+  opts: {
+    videoUrl: string;
+    caption: string;
+    mediaType?: "REELS" | "VIDEO";
+  },
+): Promise<{ containerId: string; mediaId: string }> {
+  const videoUrl = opts.videoUrl.trim();
+  const caption = opts.caption.trim();
+  const mediaType = opts.mediaType ?? "REELS";
+
+  if (!videoUrl.startsWith("https://")) {
+    throw new Error("videoUrl must be a public https:// URL");
+  }
+  if (!caption) {
+    throw new Error("caption is required");
+  }
+
+  const container = await graphPostForm<{ id: string }>(
+    `/${config.igUserId}/media`,
+    config.accessToken,
+    {
+      media_type: mediaType,
+      video_url: videoUrl,
+      caption,
+      share_to_feed: "true",
+    },
+  );
+
+  if (!container.id) {
+    throw new Error("No container id returned from Instagram video create");
+  }
+
+  // Video processing often needs longer than images
+  await waitForContainer(config, container.id, 40, 3000);
+
+  const published = await graphPostForm<{ id: string }>(
+    `/${config.igUserId}/media_publish`,
+    config.accessToken,
+    { creation_id: container.id },
+  );
+
+  if (!published.id) {
+    throw new Error("No media id returned after video publish");
+  }
+
+  return { containerId: container.id, mediaId: published.id };
+}
+
 async function waitForContainer(
   config: IgConfig,
   creationId: string,
   attempts = 10,
+  delayMs = 2000,
 ): Promise<void> {
   for (let i = 0; i < attempts; i++) {
     try {
@@ -122,7 +177,7 @@ async function waitForContainer(
     } catch (err) {
       if (i === attempts - 1) throw err;
     }
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, delayMs));
   }
 }
 

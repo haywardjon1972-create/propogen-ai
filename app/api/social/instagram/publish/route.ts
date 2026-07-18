@@ -4,12 +4,15 @@ import {
   getInstagramConfig,
   isInstagramConfigured,
   publishImagePost,
+  publishVideoPost,
 } from "@/lib/instagram";
 import { AdminAuthError, assertSocialAdmin } from "@/lib/socialAuth";
 
 type Body = {
   caption?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  mediaType?: "REELS" | "VIDEO" | "IMAGE";
   topic?: string;
   generateCaption?: boolean;
 };
@@ -41,12 +44,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const imageUrl = body.imageUrl?.trim() || process.env.INSTAGRAM_DEFAULT_IMAGE_URL?.trim();
-  if (!imageUrl) {
+  const videoUrl = body.videoUrl?.trim();
+  const imageUrl =
+    body.imageUrl?.trim() || process.env.INSTAGRAM_DEFAULT_IMAGE_URL?.trim();
+
+  if (!videoUrl && !imageUrl) {
     return NextResponse.json(
       {
         error:
-          "imageUrl required (public https image). Or set INSTAGRAM_DEFAULT_IMAGE_URL.",
+          "imageUrl or videoUrl required (public https). Or set INSTAGRAM_DEFAULT_IMAGE_URL.",
       },
       { status: 400 },
     );
@@ -59,10 +65,30 @@ export async function POST(req: NextRequest) {
     }
 
     const config = getInstagramConfig()!;
-    const result = await publishImagePost(config, { imageUrl, caption });
+
+    if (videoUrl) {
+      const result = await publishVideoPost(config, {
+        videoUrl,
+        caption,
+        mediaType: body.mediaType === "VIDEO" ? "VIDEO" : "REELS",
+      });
+      return NextResponse.json({
+        ok: true,
+        type: "video",
+        ...result,
+        caption,
+        videoUrl,
+      });
+    }
+
+    const result = await publishImagePost(config, {
+      imageUrl: imageUrl!,
+      caption,
+    });
 
     return NextResponse.json({
       ok: true,
+      type: "image",
       ...result,
       caption,
       imageUrl,
