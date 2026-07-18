@@ -1,94 +1,86 @@
 /**
  * Shared Propogen support replies for Instagram + Facebook Messenger.
- * FAQ first (pricing / free vs Pro / features), then Grok for the rest.
+ * Natural chat tone. FAQ first, then Grok.
  */
 
 export const SITE_URL = "https://propogen-ai.vercel.app";
 export const SITE_HOST = "propogen-ai.vercel.app";
-const MAX_LEN = 900; // Messenger allows more than IG comments
+const MAX_LEN = 900;
 
 export type SupportChannel = "facebook" | "instagram";
 
 export type SupportReplyResult =
   | { action: "skip"; reason: string }
-  | { action: "reply"; text: string; kind: "welcome" | "faq" | "ai" | "default" };
+  | {
+      action: "reply";
+      text: string;
+      kind: "welcome" | "faq" | "ai" | "default";
+    };
 
-const WELCOME = `Welcome to Propogen AI ✦
+const WELCOME = `Hey! 👋 Thanks for messaging Propogen AI.
 
-We help freelancers & consultants turn a short brief into a professional proposal draft — fast.
+Yes — you can create structured proposal drafts for free, no card required.
 
-FREE
-• Structured proposal drafts (no card)
-• One-click sample brief
-• Copy / .txt / Word (.docx) export
-• Regenerate, shorter, more formal
+Visit ${SITE_URL} to get started.
 
-PRO — $19 one-time (not a subscription)
-• Everything in Free
-• Live AI writing powered by Grok, tailored to your brief
+If you have questions about pricing, Pro features, or proposals, just ask!`;
 
-Try free here:
-${SITE_URL}
+const PRICING = `Yes! You can create structured proposal drafts for free — no card required.
 
-Ask me anything: pricing, free vs Pro, features, or how it works.`;
+Pro is optional: $19 one-time (not a monthly subscription) if you want live AI writing with Grok.
 
-const PRICING = `Pricing is simple:
+Visit ${SITE_URL} to try free anytime.
 
-FREE forever
-• Structured proposal drafts
-• Sample brief + export (.docx)
-• No card required
+Curious about free vs Pro? Just ask!`;
 
-PRO — $19 one-time
-• Live AI (Grok) rewrites for your client, tone & length
-• Not a monthly subscription
+const FREE_VS_PRO = `Great question.
 
-Start free: ${SITE_URL}`;
+Free gives you structured proposal drafts, templates, a sample brief, and Word export — totally free, no card.
 
-const FREE_VS_PRO = `Free vs Pro:
+Pro is $19 one-time and unlocks live AI (Grok) so drafts are tailored more closely to your brief, tone, and length.
 
-FREE
-• Professional structured drafts (exec summary, approach, next steps)
-• Templates, sample, copy & Word export
-• Great for a solid starting point
+Most people start free here: ${SITE_URL}`;
 
-PRO ($19 once)
-• Same tools + live AI generation with Grok
-• More custom, brief-aware writing
+const FEATURES = `Propogen helps you draft professional proposals fast.
 
-Most people try Free first: ${SITE_URL}`;
+You can pick a template, add your brief (or try the sample), generate a draft, refine it, and export to Word.
 
-const FEATURES = `What Propogen does:
+Free covers structured drafts and export. Pro adds live AI writing with Grok.
 
-• Business / sales / project / RFP / report-style drafts
-• Free structured generator + “Try sample”
-• Export to Word (.docx)
-• Refine: regenerate, make shorter, more formal
-• Pro: Grok-powered live AI writing
-• Built for freelancers, consultants & small businesses
+Check it out: ${SITE_URL}
 
-Open the app: ${SITE_URL}`;
+Want pricing or free vs Pro details? Happy to explain.`;
 
-const HOW_IT_WORKS = `How it works (about 30 seconds):
+const HOW_IT_WORKS = `Super simple:
 
-1. Open ${SITE_URL}
-2. Pick a template (or load the sample brief)
-3. Add company, client, topic & details
-4. Generate → refine → export Word
+Open ${SITE_URL}, pick a template (or hit Try sample), fill in company/client/topic, then generate. You can refine the draft and export to Word.
 
-Free = structured draft. Pro = Grok AI rewrite.
+Free = solid structured draft. Pro = Grok AI rewrite on top.
 
-Questions? Ask free vs Pro, pricing, or features.`;
+Give it a go — and ask if you get stuck!`;
 
-const LINK = `Here’s Propogen AI:
+const LINK = `Here’s the site:
 
 ${SITE_URL}
 
-Tip: use “Try sample” on the generator if you want a one-click demo draft.`;
+You can try a free sample draft right on the page. Questions about pricing or Pro? Just ask!`;
+
+const THANKS = `You’re very welcome!
+
+Whenever you’re ready: ${SITE_URL}
+
+Happy drafting ✨`;
+
+const DEFAULT = `Thanks for your message!
+
+Yes — you can create structured proposal drafts for free, no card required.
+
+Visit ${SITE_URL} to get started.
+
+If you have questions about pricing, Pro features, or proposals, just ask!`;
 
 type FaqRow = { name: string; match: RegExp; reply: string };
 
-/** Order matters: more specific rules first. */
 const FAQ: FaqRow[] = [
   {
     name: "welcome",
@@ -105,7 +97,7 @@ const FAQ: FaqRow[] = [
   {
     name: "pricing",
     match:
-      /\b(price|pricing|cost|how\s+much|\$|£|payment|pay|subscription|monthly|fee|charge)\b/i,
+      /\b(price|pricing|cost|how\s+much|\$|£|payment|pay|subscription|monthly|fee|charge|is\s+it\s+free|free\??)\b/i,
     reply: PRICING,
   },
   {
@@ -122,13 +114,14 @@ const FAQ: FaqRow[] = [
   },
   {
     name: "link",
-    match: /\b(link|website|url|site|where\s+(do\s+i|can\s+i)|web\s*address)\b/i,
+    match:
+      /\b(link|website|url|site|where\s+(do\s+i|can\s+i)|web\s*address)\b/i,
     reply: LINK,
   },
   {
     name: "thanks",
     match: /\b(thanks|thank\s+you|thx|ty)\b/i,
-    reply: `You’re welcome ✦\nWhenever you’re ready: ${SITE_URL}\nHappy drafting.`,
+    reply: THANKS,
   },
 ];
 
@@ -147,7 +140,6 @@ function matchFaq(source: string): { name: string; reply: string } | null {
       return { name: row.name, reply: row.reply };
     }
   }
-  // Bare "free?" / "pro?"
   if (/^\s*free\??\s*$/i.test(source)) {
     return { name: "pricing", reply: PRICING };
   }
@@ -157,25 +149,29 @@ function matchFaq(source: string): { name: string; reply: string } | null {
   return null;
 }
 
-const GROK_SYSTEM = `You are the official support assistant for Propogen AI on social chat (Facebook Messenger / Instagram).
+const GROK_SYSTEM = `You are a friendly human-sounding support person for Propogen AI on Facebook Messenger / Instagram DMs.
 
-Product facts (never invent beyond this):
-- Website: ${SITE_URL}
-- Free: structured proposal drafts, templates, sample brief, copy/txt/docx export, regenerate/shorter/formal — no card required.
-- Pro: $19 one-time (NOT monthly subscription). Live AI writing powered by Grok, tailored to brief/tone/length.
-- Audience: freelancers, consultants, small businesses.
-- Grok also helps run Propogen social content (interesting, but don't overclaim).
+Write like a real chat — short paragraphs, natural language. NOT bullet lists or brochure copy.
 
-Style:
-- Friendly, clear, professional. 2–5 short lines max.
-- Prefer plain text. Light emoji OK (✦).
-- Always include ${SITE_URL} when relevant.
-- No hard sell, no fake urgency, no "DM for payment link".
-- Never ask for passwords, card numbers, OTP, or banking details.
-- If unsure, point them to free vs Pro and the website.
+Product facts (don't invent):
+- Site: ${SITE_URL}
+- Free: structured proposal drafts, sample brief, export to Word (.docx), refine tools — no card.
+- Pro: $19 one-time (not monthly). Live AI with Grok tailored to their brief.
+- For freelancers, consultants, small businesses.
 
-If they greet you, give a warm welcome + free/Pro snapshot + link.
-If they ask pricing / free vs Pro / features, be precise.`;
+Style example (match this vibe):
+"Yes! You can create structured proposal drafts for free—no card required.
+
+Visit ${SITE_URL} to get started.
+
+If you have questions about pricing, Pro features, or proposals, just ask!"
+
+Rules:
+- 2–5 short lines. Warm and clear.
+- Include the website when helpful.
+- No hard sell, no fake urgency.
+- Never ask for passwords, cards, or banking info.
+- Plain text only.`;
 
 async function craftWithGrok(
   userText: string,
@@ -192,7 +188,7 @@ async function craftWithGrok(
     },
     body: JSON.stringify({
       model: "grok-4.5",
-      temperature: 0.45,
+      temperature: 0.55,
       messages: [
         {
           role: "system",
@@ -211,13 +207,9 @@ async function craftWithGrok(
   const data = (await res.json()) as {
     choices?: { message?: { content?: string } }[];
   };
-  const text = data.choices?.[0]?.message?.content?.trim();
-  return text || null;
+  return data.choices?.[0]?.message?.content?.trim() || null;
 }
 
-/**
- * Main entry: FAQ first, then Grok, then safe default.
- */
 export async function craftSupportReply(
   text: string,
   opts?: {
@@ -271,17 +263,11 @@ export async function craftSupportReply(
 
   return {
     action: "reply",
-    text: `Thanks for messaging Propogen AI ✦
-
-Free structured drafts (no card): ${SITE_URL}
-Pro = $19 one-time for Grok live AI.
-
-Ask about pricing, free vs Pro, or features anytime.`,
+    text: DEFAULT.slice(0, maxLen),
     kind: "default",
   };
 }
 
-/** Sync helper for simple Messenger postbacks when async isn't needed. */
 export function craftWelcomeMessage(): string {
   return WELCOME;
 }
