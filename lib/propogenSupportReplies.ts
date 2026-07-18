@@ -19,51 +19,57 @@ export type SupportReplyResult =
 
 const WELCOME = `Hey! 👋 Thanks for messaging Propogen AI.
 
-Yes — you can create structured proposal drafts for free, no card required.
+Yes! You can create structured proposal drafts for free — no card required.
 
 Visit ${SITE_URL} to get started.
+
+Pro is completely optional. If you ever want live AI assistance, it’s a one-time $19 upgrade.
 
 If you have questions about pricing, Pro features, or proposals, just ask!`;
 
 const PRICING = `Yes! You can create structured proposal drafts for free — no card required.
 
-Pro is optional: $19 one-time (not a monthly subscription) if you want live AI writing with Grok.
+Visit ${SITE_URL} to get started.
 
-Visit ${SITE_URL} to try free anytime.
+Pro is completely optional. If you ever want live AI assistance, it’s a one-time $19 upgrade (not a monthly subscription).
 
-Curious about free vs Pro? Just ask!`;
+Questions about free vs Pro? Just ask!`;
 
-const FREE_VS_PRO = `Great question.
+const FREE_VS_PRO = `Happy to explain.
 
-Free gives you structured proposal drafts, templates, a sample brief, and Word export — totally free, no card.
+On free, you get structured proposal drafts, templates, a sample brief, and Word export — no card needed.
 
-Pro is $19 one-time and unlocks live AI (Grok) so drafts are tailored more closely to your brief, tone, and length.
+Pro is completely optional. If you ever want live AI assistance with Grok, it’s a one-time $19 upgrade for more tailored writing.
 
 Most people start free here: ${SITE_URL}`;
 
-const FEATURES = `Propogen helps you draft professional proposals fast.
+const FEATURES = `Propogen helps you draft professional proposals without the blank-page stress.
 
-You can pick a template, add your brief (or try the sample), generate a draft, refine it, and export to Word.
+You can pick a template, add your brief (or try the sample), generate a draft, tweak it, and export to Word.
 
-Free covers structured drafts and export. Pro adds live AI writing with Grok.
+Free covers all of that. Pro is completely optional — if you ever want live AI assistance, it’s a one-time $19 upgrade.
 
-Check it out: ${SITE_URL}
+Have a look: ${SITE_URL}
 
-Want pricing or free vs Pro details? Happy to explain.`;
+Anything specific you’re wondering about?`;
 
-const HOW_IT_WORKS = `Super simple:
+const HOW_IT_WORKS = `It’s pretty straightforward!
 
-Open ${SITE_URL}, pick a template (or hit Try sample), fill in company/client/topic, then generate. You can refine the draft and export to Word.
+Open ${SITE_URL}, pick a template (or hit Try sample), add your company, client and topic, then generate. You can refine the draft and export to Word.
 
-Free = solid structured draft. Pro = Grok AI rewrite on top.
+Free gives you a solid structured draft. Pro is completely optional — live AI assistance is a one-time $19 upgrade if you want it later.
 
-Give it a go — and ask if you get stuck!`;
+Give it a try, and just ask if you get stuck!`;
 
 const LINK = `Here’s the site:
 
 ${SITE_URL}
 
-You can try a free sample draft right on the page. Questions about pricing or Pro? Just ask!`;
+You can try a free sample draft right on the page — no card required.
+
+Pro is completely optional. If you ever want live AI assistance, it’s a one-time $19 upgrade.
+
+Questions? Just ask!`;
 
 const THANKS = `You’re very welcome!
 
@@ -73,12 +79,13 @@ Happy drafting ✨`;
 
 const DEFAULT = `Thanks for your message!
 
-Yes — you can create structured proposal drafts for free, no card required.
+Yes! You can create structured proposal drafts for free — no card required.
 
 Visit ${SITE_URL} to get started.
 
-If you have questions about pricing, Pro features, or proposals, just ask!`;
+Pro is completely optional. If you ever want live AI assistance, it’s a one-time $19 upgrade.
 
+If you have questions about pricing, Pro features, or proposals, just ask!`;
 type FaqRow = { name: string; match: RegExp; reply: string };
 
 const FAQ: FaqRow[] = [
