@@ -141,9 +141,8 @@ export default function Pricing() {
         </div>
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-muted">
-          Payments are processed securely by Stripe. Use test card{" "}
-          <code className="rounded bg-card px-1 py-0.5">4242 4242 4242 4242</code>{" "}
-          in test mode.
+          Payments are processed securely by Stripe. Pro is a one-time unlock —
+          not a subscription.
         </p>
       </div>
     </section>
