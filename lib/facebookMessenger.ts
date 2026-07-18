@@ -110,12 +110,17 @@ export async function sendMessengerText(
   pageAccessToken: string,
   recipientPsid: string,
   text: string,
-): Promise<{ message_id?: string }> {
-  return graphPostJson("/me/messages", pageAccessToken, {
+): Promise<{ message_id?: string; recipient_id?: string }> {
+  const result = await graphPostJson<{
+    message_id?: string;
+    recipient_id?: string;
+  }>("/me/messages", pageAccessToken, {
     recipient: { id: recipientPsid },
     messaging_type: "RESPONSE",
     message: { text: text.slice(0, 2000) },
   });
+  console.log("[fb-send] Graph API response", result);
+  return result;
 }
 
 export function makeConfirmationCode(seed: string): string {

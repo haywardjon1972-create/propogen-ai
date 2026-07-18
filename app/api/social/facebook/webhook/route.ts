@@ -129,15 +129,31 @@ async function handleMessagingEvent(
       ? String(event.postback.mid)
       : `pb:${senderId}:${payload}`;
     const key = `fb:pb:${mid}`;
-    if (alreadyHandled(key)) return;
+
+    console.log("[fb-webhook] postback received", {
+      senderPsid: senderId,
+      payload,
+      mid,
+    });
+
+    if (alreadyHandled(key)) {
+      console.log("[fb-webhook] skip duplicate postback", key);
+      return;
+    }
     markHandled(key);
 
     const text = craftMessengerReply("", payload);
     try {
-      await sendMessengerText(pageAccessToken, senderId, text);
-      console.log("[fb-webhook] replied to postback from", senderId);
+      const result = await sendMessengerText(pageAccessToken, senderId, text);
+      console.log("[fb-webhook] postback Send API success", {
+        senderPsid: senderId,
+        message_id: result.message_id ?? result,
+      });
     } catch (err) {
-      console.error("[fb-webhook] postback reply failed:", err);
+      console.error("[fb-webhook] postback Send API failed", {
+        senderPsid: senderId,
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
     return;
   }
@@ -145,24 +161,41 @@ async function handleMessagingEvent(
   // --- messages ---
   if (event.message) {
     const text = event.message.text ? String(event.message.text) : "";
+    const mid = event.message.mid ? String(event.message.mid) : "";
+
+    console.log("[fb-webhook] message received", {
+      senderPsid: senderId,
+      mid,
+      text,
+    });
+
     if (!text.trim()) {
-      console.log("[fb-webhook] skip non-text message");
+      console.log("[fb-webhook] skip non-text message", { senderPsid: senderId });
       return;
     }
 
-    const mid = event.message.mid
-      ? String(event.message.mid)
+    const key = mid
+      ? `fb:m:${mid}`
       : `m:${senderId}:${text.slice(0, 40)}`;
-    const key = `fb:m:${mid}`;
-    if (alreadyHandled(key)) return;
+    if (alreadyHandled(key)) {
+      console.log("[fb-webhook] skip duplicate message", key);
+      return;
+    }
     markHandled(key);
 
     const reply = craftMessengerReply(text);
     try {
-      await sendMessengerText(pageAccessToken, senderId, reply);
-      console.log("[fb-webhook] replied to message from", senderId);
+      const result = await sendMessengerText(pageAccessToken, senderId, reply);
+      console.log("[fb-webhook] message Send API success", {
+        senderPsid: senderId,
+        message_id: result.message_id ?? result,
+        replyPreview: reply.slice(0, 80),
+      });
     } catch (err) {
-      console.error("[fb-webhook] message reply failed:", err);
+      console.error("[fb-webhook] message Send API failed", {
+        senderPsid: senderId,
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
   }
 }
