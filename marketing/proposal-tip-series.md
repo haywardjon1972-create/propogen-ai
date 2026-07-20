@@ -17,3 +17,5 @@ Cadence: every few days. Format: short Reel + hashtags + soft free CTA.
 
 Site: propogen-ai.vercel.app  
 Tone: helpful, free-first, Pro optional.
+
+**Talking Reels rule:** do not have the AI person *say* the URL (it garbles). Burn **propogen-ai.vercel.app** on-screen (ffmpeg/drawtext or frame overlay). Caption can soft-mention the site only.
