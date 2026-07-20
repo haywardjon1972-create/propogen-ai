@@ -8,8 +8,8 @@ Cadence: every few days. Format: short Reel + hashtags + soft free CTA.
 | **2** | Open with the problem they hired you to solve ✅ |
 | **3** | Keep the first screen scannable (3 bullets max) ✅ |
 | **4** | Price only after value is clear ✅ (URL on-screen, not spoken) |
-| 5 | Name the next step (call / deposit / start date) |
-| 6 | Mirror their words from the sales call |
+| **5** | Name the next step (call / deposit / start date) ✅ |
+| **6** | Mirror their words from the sales call ✅ |
 | 7 | Scope what’s out as clearly as what’s in |
 | 8 | One page exec summary beats a novel |
 | 9 | Send while the call energy is still warm |
